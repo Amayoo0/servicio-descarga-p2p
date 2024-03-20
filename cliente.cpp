@@ -144,6 +144,8 @@ int main()
 #endif
                 // lanzamos hebra para conectar con los datos del cliente.
                 cliente_descarga = std::thread(hebra_cliente_ficheros, solicitud, reply.to_string());
+                cliente_descarga.detach();
+                
                 break;
             default:
                 noFin = false;
@@ -154,7 +156,6 @@ int main()
     {
         hebra.join();
     }
-    cliente_descarga.join();
     
     return 0;
 }
@@ -233,6 +234,7 @@ void hebra_cliente_ficheros(std::string fichero, std::string dir_cliente){
 
     socket.connect(dir_cliente);
 
+
     // REQ: solicita fichero al cliente
     ret = socket.send(zmq::buffer(fichero), zmq::send_flags::none);
     if (!ret) {
@@ -254,5 +256,6 @@ void hebra_cliente_ficheros(std::string fichero, std::string dir_cliente){
     }
 
     f_out.close();
+    socket.close();
 
 }

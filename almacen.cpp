@@ -145,9 +145,5 @@ bool AlmacenDirecciones::recuperar_datos(const std::string& nombre_archivo) {
 
 
 /*
-    Volcar datos en un fichero
-
-    Leer los datos de un fichero cuando el servidor arranca
-
-    utilizar un mutex cuando se acceda a memoria compartida
+    utilizar un mutex cuando se acceda a memoria compartida (si dos clientes quieren escribir en el almacen)
 */
