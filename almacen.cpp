@@ -1,11 +1,4 @@
-#include <iostream>
-#include <map>
-#include <vector>
-#include <utility>      //para std::pair
-#include <arpa/inet.h>  //para inet_addr e inet_ntoa
-#include <cstdint>
 #include "almacen.h"
-#include <fstream>      //para manejo de ficheros
 
 /**
  * Agrega un cliente al almacén.
@@ -144,6 +137,3 @@ bool AlmacenDirecciones::recuperar_datos(const std::string& nombre_archivo) {
 
 
 
-/*
-    utilizar un mutex cuando se acceda a memoria compartida (si dos clientes quieren escribir en el almacen)
-*/

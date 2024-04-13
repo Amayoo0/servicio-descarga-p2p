@@ -9,7 +9,7 @@
 
 /* --- CONSTANTES --- */
 const std::string ip_puerto_escucha = "tcp://*:5555";
-const std::string fichero_backup = "datos_almacen.txt";
+const std::string fichero_backup = "./storage/datos_almacen.txt";
 
 
 

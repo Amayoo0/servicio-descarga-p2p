@@ -7,7 +7,7 @@
 #include <utility>      //para std::pair
 #include <arpa/inet.h>  //para inet_addr e inet_ntoa
 #include <cstdint>
-
+#include <fstream>      //para manejo de ficheros
 
 
 
