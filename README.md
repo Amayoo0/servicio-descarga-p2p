@@ -40,23 +40,15 @@ g++ -I. -o ./builds/servidor servidor.cpp ./includes/almacen.cpp -std=c++17 -lzm
 
 ## Uso
 
-    Ejecuta el servidor en una máquina accesible desde los clientes.
-    Ejecuta el cliente en las máquinas de los usuarios que deseen ofrecer/descargar archivos.
-    El cliente puede enviar solicitudes al servidor (opción 1) para encontrar clientes disponibles para un fichero.
-    El servidor busca el archivo en su base de datos y le envía la dirección IP y puerto.
-    El cliente que desee descargar un fichero (opción 2) establecerá un socket con el cliente registado en el servidor y se realizará la transferencia de fichero.
-
-## Tareas
-Ampliación con crow en otro puerto: pedir los ficheros del torrent por http.
-Ampliación ASIO async.
-
-WebSocket. 
-    El codigo websocket_basisco.html está en el servidor en /template y cuando el cliente accede a este fichero 
-    se lo descarga y con un moustache en la ip para que el servidor le devuelva la variable con su propia ip.
-
+1. Ejecuta el servidor en una máquina accesible desde los clientes.
+2. Ejecuta el cliente en las máquinas de los usuarios que deseen ofrecer/descargar archivos.
+3. El cliente puede enviar solicitudes al servidor (opción 1) para encontrar clientes disponibles para un fichero.
+4. El servidor busca el archivo en su base de datos y le envía la dirección IP y puerto.
+5. El cliente que desee descargar un fichero (opción 2) establecerá un socket con el cliente registado en el servidor y se realizará la transferencia de fichero.
 
 
 ## Lineas futuras
 1. Utilizar un mutex cuando se acceda a memoria compartida (si dos clientes quieren escribir en el almacen)
 2. Separar FileService en una clase externa. Problema: Exception: bad_weak_ptr
 3. Si un cliente_descarga no está disponible, solicitar otro cliente al servidor.
+4. Servicio Crow en otro puerto: pedir los ficheros del servicio-p2p por http.

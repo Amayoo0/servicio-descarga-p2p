@@ -271,7 +271,6 @@ void do_connect(boost::asio::io_context &ioc, const std::string server_address, 
         boost::asio::ip::tcp::resolver resolver(ioc);
         boost::asio::ip::tcp::resolver::query query(server_address, server_port);
         boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-        // boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(server_address), server_port);
         // Connect to the server
         boost::asio::connect(servicio->socket_conectado, endpoint_iterator);
         std::cout << "He hecho el connect\n";
