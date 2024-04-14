@@ -1,8 +1,8 @@
 #include <string>
 #include <thread>
 #include <iostream>
-#include <zmq.hpp>
-#include "almacen.h"
+#include <includes/zmq.hpp>
+#include "includes/almacen.h"
 #include <csignal> // Para manejo de señales
 
 #define DEBUG_PRINTF
@@ -22,7 +22,7 @@ AlmacenDirecciones almacen;
 void sigint_handler(int signal) // manejadora Ctrl+C
 {
 #ifdef DEBUG_PRINTF
-    std::cout << "Se recibió una señal SIGINT (Ctrl+C)" << std::endl;
+    std::cout << "\n\nSe recibió una señal SIGINT (Ctrl+C) \nGuardando datos..." << std::endl;
 #endif
     almacen.salvar_datos(fichero_backup);
     exit(signal); // Sale del programa con el código de señal recibido
