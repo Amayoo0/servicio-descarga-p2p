@@ -1,6 +1,6 @@
 # Servicio de Descarga P2P con Persistencia en Base de Datos
 
-Este proyecto implementa un servicio de descarga peer-to-peer (P2P) utilizando ZeroMQ (zmq) y Boost.Asio en C++. El servidor se encarga de gestionar las conexiones de los clientes y de almacenar los archivos descargados en una base de datos para garantizar la persistencia de los datos.
+Este proyecto implementa un servicio de descarga peer-to-peer (P2P) utilizando ZeroMQ (zmq) y Boost.Asio en C++. El servidor se encarga de gestionar las conexiones de los clientes y de almacenar los archivos subidos en una base de datos para garantizar la persistencia de los datos.
 
 ## Características
 
