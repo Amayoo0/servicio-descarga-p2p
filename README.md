@@ -49,6 +49,7 @@ g++ -I. -o ./builds/servidor servidor.cpp ./includes/almacen.cpp -std=c++17 -lzm
 
 ## Lineas futuras
 1. Utilizar un mutex cuando se acceda a memoria compartida (si dos clientes quieren escribir en el almacen)
-2. Separar FileService en una clase externa. Problema: Exception: bad_weak_ptr
-3. Si un cliente_descarga no está disponible, solicitar otro cliente al servidor.
-4. Servicio Crow en otro puerto: pedir los ficheros del servicio-p2p por http.
+2. Cuando un cliente muera que avise al servidor y elimine su entrada de la base de datos
+3. Separar FileService en una clase externa. Problema: Exception: bad_weak_ptr
+4. Si un cliente_descarga no está disponible, solicitar otro cliente al servidor.
+5. Servicio Crow en otro puerto: pedir los ficheros del servicio-p2p por http.

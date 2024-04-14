@@ -12,21 +12,20 @@
 #include <boost/asio/posix/stream_descriptor.hpp>
 #include <cstdlib>
 
-#define DEBUG_PRINTF
+// #define DEBUG_PRINTF
 
 /* --- CONSTANTES --- */
 const std::string SERVIDOR = "tcp://localhost:5555";
 const std::string SEPARADOR = "</>";
 
 /* --- FUNCIONES --- */
-void hebra_servidora_ficheros(uint16_t puerto);
+void hebra_servidora_ficheros(uint16_t puerto, std::string nombre_fichero);
 void hebra_cliente_ficheros(std::string fichero, std::string dir_cliente);
-void do_accept(boost::asio::io_context &ioc, boost::asio::ip::tcp::acceptor &acceptor);
+void do_accept(boost::asio::io_context &ioc, boost::asio::ip::tcp::acceptor &acceptor, std::string nombre_fichero);
 void do_connect(boost::asio::io_context &ioc, const std::string server_address, std::string server_port, std::string nombre_fichero);
 
 int main()
 {
-    std::string solicitud{};
     std::string nombre, ip, puerto;
     std::string ack{"ACK"};
     zmq::send_result_t ret = 0;
@@ -46,6 +45,7 @@ int main()
     bool noFin = true;
     while (noFin)
     {
+        std::string solicitud{};
         int opcion = 0;
         std::cout << std::endl
                   << "Qué opción desea:" << std::endl;
@@ -117,10 +117,9 @@ int main()
             }
 
             // lanzar hebra que escuche peticiones en el puerto indicado.
-            servidoras_escuchando.push_back(std::thread(hebra_servidora_ficheros, std::stoi(puerto)));
+            servidoras_escuchando.push_back(std::thread(hebra_servidora_ficheros, std::stoi(puerto), nombre));
             break;
         case 2: // Descargar un fichero
-            std::cout << "Descargar un fichero" << std::endl;
             // REQ: enviamos opción al servidor
             ret = socket.send(zmq::buffer(std::to_string(opcion)), zmq::send_flags::none);
             if (!ret)
@@ -135,7 +134,7 @@ int main()
                 exit(-1);
             }
 
-            std::cout << "Indique el nombre completo del fichero que desea descargar:" << std::endl;
+            std::cout << "Noombre fichero? ";
             std::cin >> solicitud;
             // REQ: enviamos nombre de fichero
             ret = socket.send(zmq::buffer(solicitud), zmq::send_flags::none);
@@ -197,7 +196,9 @@ public:
     }
     ~FileService()
     {
-        std::cout << "Destructor\n";
+#ifdef DEBUG_PRINTF
+        std::cout << "Destructor FileService\n";
+#endif
         if (file.is_open())
         {
             file.close();
@@ -219,9 +220,10 @@ public:
                    {
                        if (!ec)
                        {
-                           std::cout << "Servidor lee: " << leidos << std::endl;
+#ifdef DEBUG_PRINTF
+                           std::cout << "Servidor lee (" << leidos << " bytes): " << self->datos.data() << std::endl;
+#endif
                            write(self->socket_conectado, boost::asio::buffer(self->datos, leidos));
-                           std::cout << "Servidor escribe!" << std::endl;
                            self->do_read();
                        }
                    });
@@ -234,26 +236,29 @@ public:
                    {
                        if (!ec)
                        {
-                           std::cout << "Cliente lee: " << leidos << std::endl;
+#ifdef DEBUG_PRINTF
+                           std::cout << "Cliente lee (" << leidos << " bytes): " << self->datos.data() << std::endl;
+#endif
                            write(self->file, boost::asio::buffer(self->datos, leidos));
-                           std::cout << "Cliente escribe!" << std::endl;
                            self->do_write();
                        }
                    });
     }
 };
 
-void do_accept(boost::asio::io_context &ioc, boost::asio::ip::tcp::acceptor &acceptor)
+void do_accept(boost::asio::io_context &ioc, boost::asio::ip::tcp::acceptor &acceptor, std::string nombre_fichero)
 {
-    std::shared_ptr<FileService> servicio = FileService::create(ioc, "fichero.txt");
+    std::shared_ptr<FileService> servicio = FileService::create(ioc, nombre_fichero);
+#ifdef DEBUG_PRINTF
     std::cout << "use_count: " << servicio.use_count() << std::endl;
+#endif
     acceptor.async_accept(servicio->socket_conectado,
-                          [&ioc, &acceptor, servicio](const boost::system::error_code &ec) { // la lambda necesita: &ioc, &acceptor y servicio como copia (se puede porque es shared)
+                          [&ioc, &acceptor, servicio, nombre_fichero](const boost::system::error_code &ec) { // la lambda necesita: &ioc, &acceptor y servicio como copia (se puede porque es shared)
                               if (!ec)
                               {
                                   servicio->do_read();
                               }
-                              do_accept(ioc, acceptor);
+                              do_accept(ioc, acceptor, nombre_fichero);
                           });
 }
 
@@ -266,14 +271,13 @@ void do_connect(boost::asio::io_context &ioc, const std::string server_address, 
     if (outfile.is_open())
     {
         outfile.close();
-        std::shared_ptr<FileService> servicio = FileService::create(ioc, "fichero.txt");
+        std::shared_ptr<FileService> servicio = FileService::create(ioc, nombre_fichero);
         // Resolve the host and port
         boost::asio::ip::tcp::resolver resolver(ioc);
         boost::asio::ip::tcp::resolver::query query(server_address, server_port);
         boost::asio::ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
         // Connect to the server
         boost::asio::connect(servicio->socket_conectado, endpoint_iterator);
-        std::cout << "He hecho el connect\n";
         servicio->do_write();
     }
     else
@@ -282,7 +286,7 @@ void do_connect(boost::asio::io_context &ioc, const std::string server_address, 
     }
 }
 
-void hebra_servidora_ficheros(uint16_t puerto)
+void hebra_servidora_ficheros(uint16_t puerto, std::string nombre_fichero)
 {
 #ifdef DEBUG_PRINTF
     std::cout << "[Hebra servidora] Escuchando peticiones en el puerto: " << puerto << std::endl;
@@ -293,7 +297,7 @@ void hebra_servidora_ficheros(uint16_t puerto)
         boost::asio::ip::tcp::acceptor acceptor{io, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), puerto)};
 
         acceptor.listen();
-        do_accept(io, acceptor);
+        do_accept(io, acceptor, nombre_fichero);
 
         io.run();
     }

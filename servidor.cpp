@@ -5,7 +5,7 @@
 #include "includes/almacen.h"
 #include <csignal> // Para manejo de señales
 
-#define DEBUG_PRINTF
+// #define DEBUG_PRINTF
 
 /* --- CONSTANTES --- */
 const std::string ip_puerto_escucha = "tcp://*:5555";
@@ -21,9 +21,7 @@ AlmacenDirecciones almacen;
 /* --- FUNCIONES --- */
 void sigint_handler(int signal) // manejadora Ctrl+C
 {
-#ifdef DEBUG_PRINTF
     std::cout << "\n\nSe recibió una señal SIGINT (Ctrl+C) \nGuardando datos..." << std::endl;
-#endif
     almacen.salvar_datos(fichero_backup);
     exit(signal); // Sale del programa con el código de señal recibido
 }
