@@ -8,7 +8,7 @@
 #include <arpa/inet.h>  //para inet_addr e inet_ntoa
 #include <cstdint>
 #include <fstream>      //para manejo de ficheros
-
+#include <boost/format.hpp>
 
 
 class AlmacenDirecciones{
@@ -28,6 +28,7 @@ class AlmacenDirecciones{
     std::string obtener_ficheros();
     bool salvar_datos(const std::string &nombre_archivo);
     bool recuperar_datos(const std::string &nombre_archivo);
+    std::string to_html();
 
 };
 

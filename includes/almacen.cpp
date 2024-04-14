@@ -136,4 +136,63 @@ bool AlmacenDirecciones::recuperar_datos(const std::string& nombre_archivo) {
 }
 
 
+std::string AlmacenDirecciones::to_html() {
+    std::string html{
+    R"(
+        <!DOCTYPE html>
+        <html>
+        <head>
+        <style>
+        table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+        }
+
+        td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+        }
+
+        tr:nth-child(even) {
+        background-color: #dddddd;
+        }
+        </style>
+        </head>
+        <body>
+
+        <h2>Almacen de direcciones</h2>
+        <table>
+            <tr>
+                <th>Fichero</th>
+                <th>Direccion IP</th>
+                <th>Puerto</th>
+            </tr>
+    )"
+    };
+    for( const auto & f: tabla ){
+        html.append("<tr>");
+
+        for( const auto & d: f.second ){
+            auto [ip, puerto] = ip_puerto_to_string(d.first, d.second);
+            html.append((boost::format(R"(
+                <tr>
+                    <td>%1%</td>
+                    <td>%2%</td>
+                    <td>%3%</td>
+                </tr>
+            )") %f.first % ip % puerto).str());
+        }
+    }
+    html.append(
+        R"(
+            </table>
+            </body>
+            </html>
+        )"
+    );
+    return html;
+}
+
 

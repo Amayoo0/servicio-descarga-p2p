@@ -4,8 +4,11 @@
 #include <includes/zmq.hpp>
 #include "includes/almacen.h"
 #include <csignal> // Para manejo de señales
+#include <thread>
+#include "includes/crow_all.h"
 
 // #define DEBUG_PRINTF
+#define PUERTO_CROW 8080
 
 /* --- CONSTANTES --- */
 const std::string ip_puerto_escucha = "tcp://*:5555";
@@ -15,7 +18,7 @@ const std::string fichero_backup = "./storage/datos_almacen.txt";
 
 /* --- VARIABLES GLOBALES --- */
 AlmacenDirecciones almacen;
-
+std::thread servidor_crow;
 
 
 /* --- FUNCIONES --- */
@@ -23,10 +26,23 @@ void sigint_handler(int signal) // manejadora Ctrl+C
 {
     std::cout << "\n\nSe recibió una señal SIGINT (Ctrl+C) \nGuardando datos..." << std::endl;
     almacen.salvar_datos(fichero_backup);
+    servidor_crow.join();
     exit(signal); // Sale del programa con el código de señal recibido
 }
 
+void servidor_crow_handler()
+{
+    crow::SimpleApp app;
 
+    CROW_ROUTE(app, "/")([](){
+        std::string datos_almacen = almacen.to_html();
+        return datos_almacen;
+    });
+
+    app.loglevel(crow::LogLevel::Error);
+
+    app.port(PUERTO_CROW).multithreaded().run();
+}
 
 int main() 
 {
@@ -44,9 +60,12 @@ int main()
     std::string ack{"ACK"};
 
 
-
     // recuperamos los datos de la última sesión si los hubiera
     almacen.recuperar_datos(fichero_backup);
+
+    
+    // inicializamos servidor Crow HTTP
+    servidor_crow = std::thread(servidor_crow_handler);
 
     for (;;) 
     {
