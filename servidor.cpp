@@ -6,6 +6,8 @@
 #include <csignal> // Para manejo de señales
 #include <thread>
 #include "includes/crow_all.h"
+#include <unordered_map>
+#include <sstream>
 
 // #define DEBUG_PRINTF
 #define PUERTO_CROW 8080
@@ -13,6 +15,7 @@
 /* --- CONSTANTES --- */
 const std::string ip_puerto_escucha = "tcp://*:5555";
 const std::string fichero_backup = "./storage/datos_almacen.txt";
+const std::string SEPARADOR = "</>";
 
 
 
@@ -30,16 +33,101 @@ void sigint_handler(int signal) // manejadora Ctrl+C
     exit(signal); // Sale del programa con el código de señal recibido
 }
 
+// Función de manejo para la ruta "/guardar"
+void guardar_string(crow::response& res, const crow::request& req) {
+
+}
+
+std::string formatea_solicitud(const std::string body){
+    std::string resultado{};
+    // Parsear los datos y almacenarlos en un mapa
+    std::unordered_map<std::string, std::string> datos;
+    std::istringstream iss(body);
+    std::string token;
+    while (std::getline(iss, token, '&')) {
+        size_t pos = token.find('=');
+        if (pos != std::string::npos) {
+            std::string clave = token.substr(0, pos);
+            std::string valor = token.substr(pos + 1);
+            // Decodificar valor (si es necesario)
+            // Aquí puedes implementar tu propia lógica de decodificación de URL
+            // En este ejemplo, no se realiza decodificación
+            datos[clave] = valor;
+        }
+    }
+    resultado = datos["nombre_fichero"] + SEPARADOR + datos["ip"] + SEPARADOR + datos["puerto"] + SEPARADOR ;
+    return resultado;
+}
+
 void servidor_crow_handler()
 {
     crow::SimpleApp app;
 
-    CROW_ROUTE(app, "/")([](){
+    CROW_ROUTE(app, "/")
+    ([]() {
         std::string datos_almacen = almacen.to_html();
-        return datos_almacen;
+        return datos_almacen;        
     });
 
+    CROW_ROUTE(app, "/guardar")
+    .methods("POST"_method)
+    ([](const crow::request &req){
+        std::string resultado = formatea_solicitud(req.body);
+        if( almacen.agregar_cliente(resultado) ){
+            std::string ack = "ACK";
+            return ack;
+        }else{
+            return resultado;
+        }
+    });
+
+    // Ruta para mostrar el perfil del usuario
+    CROW_ROUTE(app, "/perfil")
+    ([]() {
+        // Datos del usuario (nombre y edad)
+        std::string nombre = "Antonio";
+        int edad = 22;
+
+        crow::mustache::context ctx;
+        ctx["nombre"] = nombre;
+        ctx["edad"] = edad;
+
+        // Renderizar la plantilla HTML con los datos del usuario
+        return crow::mustache::load("perfil.html").render(ctx);
+    });
+
+    CROW_ROUTE(app, "/agregar_fichero/<string>/<string>/<string>")
+    ([](const std::string& nombre_fichero, const std::string& ip, const std::string puerto)
+    {
+        std::string solicitud = nombre_fichero + SEPARADOR + ip + SEPARADOR + puerto + SEPARADOR;
+        almacen.agregar_cliente(solicitud);
+        crow::response res;
+        res.body = (boost::format(R"(<h2>Fichero agregado correctamente.</h2> <a href='localhost:%1%/'>Inicio</a>)") % PUERTO_CROW).str();
+        return res;
+    });
+
+    // Configurar la ruta "/guardar" para manejar solicitudes POST
+    // CROW_ROUTE(app, "/guardar").methods("POST"_method)
+    // ([&](, const crow::request& req){
+    //     // Verificar si el cuerpo de la solicitud contiene datos
+    //     if (!req.body.empty()) {
+    //         // Obtener el string del cuerpo de la solicitud
+    //         std::string nuevo_string = req.body;
+
+    //         // Aquí podrías almacenar el string en algún lugar, por ejemplo, en una variable global o en una base de datos
+
+    //         // Enviar una respuesta al cliente indicando que se ha guardado el string correctamente
+    //         res.code = 200;
+    //         res.body = "String guardado correctamente: " + nuevo_string;
+    //     } else {
+    //         // Enviar una respuesta de error si el cuerpo de la solicitud está vacío
+    //         res.code = 400;
+    //         res.body = "Error: El cuerpo de la solicitud está vacío";
+    //     }
+    // });
+
     app.loglevel(crow::LogLevel::Error);
+
 
     app.port(PUERTO_CROW).multithreaded().run();
 }
