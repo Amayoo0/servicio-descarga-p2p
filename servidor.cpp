@@ -33,11 +33,6 @@ void sigint_handler(int signal) // manejadora Ctrl+C
     exit(signal); // Sale del programa con el código de señal recibido
 }
 
-// Función de manejo para la ruta "/guardar"
-void guardar_string(crow::response& res, const crow::request& req) {
-
-}
-
 std::string formatea_solicitud(const std::string body){
     std::string resultado{};
     // Parsear los datos y almacenarlos en un mapa
