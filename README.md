@@ -42,9 +42,9 @@ g++ -I. -o ./builds/servidor servidor.cpp ./includes/almacen.cpp -std=c++17 -lzm
 
 1. Ejecuta el servidor en una máquina accesible desde los clientes.
 2. Ejecuta el cliente en las máquinas de los usuarios que deseen ofrecer/descargar archivos.
-3. El cliente puede enviar solicitudes al servidor (opción 1) para encontrar clientes disponibles para un fichero.
-4. El servidor busca el archivo en su base de datos y le envía la dirección IP y puerto.
-5. El cliente que desee descargar un fichero (opción 2) establecerá un socket con el cliente registado en el servidor y se realizará la transferencia de fichero.
+3. El cliente puede enviar solicitudes al servidor (opción 0) para encontrar fichero disponibles en el servicio P2P.
+4. El cliente puede subir un nuevo fichero al listado del servidor (opción 1) indicando su IP y puerto en el que atenderá otros clientes.
+5. El cliente que desee descargar un fichero (opción 2) consultará la IP y puerto al servidor. El servidor busca el archivo en su base de datos y le envía la dirección IP y puerto. Finalmente, el cliente establece un socket de comunicación y se realiza la transferencia de ficheros entre pares. 
 
 
 ## Lineas futuras
@@ -52,4 +52,4 @@ g++ -I. -o ./builds/servidor servidor.cpp ./includes/almacen.cpp -std=c++17 -lzm
 2. Cuando un cliente muera que avise al servidor y elimine su entrada de la base de datos
 3. Separar FileService en una clase externa. Problema: Exception: bad_weak_ptr
 4. Si un cliente_descarga no está disponible, solicitar otro cliente al servidor.
-5. Servicio Crow en otro puerto: pedir los ficheros del servicio-p2p por http.
+5. Serializar la información entre cliente y servidor.
